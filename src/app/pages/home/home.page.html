@@ -1,0 +1,23 @@
+<div class="home-container">
+
+  <h1 class="home-title">Latest Blog Posts</h1>
+  <!-- Add this above your grid in home.page.html -->
+  <div class="featured-banner">
+    <strong>🔥 Featured:</strong> <span>Check out our latest deep dive on Angular Signals!</span>
+  </div>
+  <p class="home-description">
+    Welcome to our blog! Here you'll find the latest articles on Angular, web development, and more.
+    Dive into our posts to stay updated with the latest trends and insights.</p>
+  <div class="ag-grid-card">
+    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; min-height: 400px;" 
+      [rowData]="rowData"
+      [columnDefs]="columnDefs"
+      [pagination]="true" 
+      [paginationPageSize]="5"
+      [paginationPageSizeSelector]="[5, 20, 50, 100]" 
+      [domLayout]="'autoHeight'" 
+      [theme]="'legacy'"
+      (rowClicked)="onRowClicked($event)">
+    </ag-grid-angular>
+  </div>
+</div>

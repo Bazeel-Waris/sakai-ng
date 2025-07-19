@@ -1,0 +1,43 @@
+<div class="login-page flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-100 to-pink-100">
+  <div class="login-box bg-white p-8 rounded-xl shadow-lg w-full max-w-md animate-fadeIn">
+    <div class="text-center mb-6">
+      <img src="https://cdn.pixabay.com/photo/2020/08/05/13/28/eco-5465482_1280.png" alt="logo" class="mb-3 h-[96px] w-[96px] mx-auto" />
+      <h2 class="text-gray-900 text-2xl font-bold mb-2">Create Account</h2>
+      <p class="text-gray-600 text-sm">Register to get started with Blogify</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
+      <div>
+        <label for="name" class="block text-gray-900 font-medium mb-1">Name</label>
+        <input id="name" type="text" pInputText formControlName="name" class="w-full" placeholder="Enter your name" />
+        <small *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="text-red-500">
+          Name is required.
+        </small>
+      </div>
+
+      <div>
+        <label for="email" class="block text-gray-900 font-medium mb-1">Email</label>
+        <input id="email" type="email" pInputText formControlName="email" class="w-full" placeholder="Enter your email" />
+        <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-red-500">
+          <ng-container *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</ng-container>
+          <ng-container *ngIf="registerForm.get('email')?.errors?.['email']">Enter a valid email address.</ng-container>
+        </small>
+      </div>
+
+      <div>
+        <label for="password" class="block text-gray-900 font-medium mb-1">Password</label>
+        <input id="password" type="password" pPassword formControlName="password" [feedback]="false" class="w-full" placeholder="Enter your password" />
+        <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-red-500">
+          Password is required.
+        </small>
+      </div>
+
+      <button type="submit" pButton label="Register" class="w-full mt-2 p-3 text-base font-semibold" [disabled]="registerForm.invalid"></button>
+    </form>
+
+    <div class="text-center mt-6">
+      <span class="text-gray-600">Already have an account?</span>
+      <a routerLink="/login" class="text-blue-600 font-medium ml-1 hover:underline">Login</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<div *ngIf="post; else notFound" class="post-detail-container">
+  <h1 class="post-title">{{ post.title }}</h1>
+  <div class="post-meta">
+    <img [src]="post.author.avatarUrl" alt="Author avatar" class="author-avatar" />
+    <div>
+      <div class="author-name">{{ post.author.name }}</div>
+      <div class="author-bio">{{ post.author.bio }}</div>
+      <div class="published-date">
+        <i class="pi pi-calendar"></i>
+        {{ post.publishedDate | date:'longDate' }}
+      </div>
+    </div>
+  </div>
+  <div class="post-content">
+    {{ post.body }}
+  </div>
+</div>
+<ng-template #notFound>
+  <div class="not-found">Post not found.</div>
+</ng-template>

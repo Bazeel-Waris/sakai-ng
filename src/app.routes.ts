@@ -1,23 +1,38 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
-import { Dashboard } from './app/pages/dashboard/dashboard';
-import { Documentation } from './app/pages/documentation/documentation';
-import { Landing } from './app/pages/landing/landing';
-import { Notfound } from './app/pages/notfound/notfound';
+import { authGuard } from './app/shared/guards/auth.guard';
+import { HomePage } from './app/pages/home/home.page';
 
 export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
         children: [
-            { path: '', component: Dashboard },
-            { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
-            { path: 'documentation', component: Documentation },
-            { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
+            {
+                path: '',
+                loadComponent: () => import('./app/pages/home/home.page').then(m => m.HomePage),
+            },
+            {
+                path: 'post/:id',
+                loadComponent: () => import('./app/pages/post-detail/post-detail.page').then(m => m.PostDetailPage),
+            },
+            {
+                path: 'create',
+                // canActivate: [authGuard],
+                loadComponent: () => import('./app/pages/create-post/create-post.page').then(m => m.CreatePostPage),
+            },
         ]
     },
-    { path: 'landing', component: Landing },
-    { path: 'notfound', component: Notfound },
-    { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
-    { path: '**', redirectTo: '/notfound' }
+    {
+        path: 'login',
+        loadComponent: () => import('./app/pages/login/login.page').then(m => m.LoginPage),
+    },
+    {
+        path: 'register',
+        loadComponent: () => import('./app/pages/register/register.page').then(m => m.RegisterPage),
+    },
+    // {
+    //     path: '**',
+    //     loadComponent: () => import('./app/pages/notfound/notfound').then(m => m.Notfound),
+    // }
 ];

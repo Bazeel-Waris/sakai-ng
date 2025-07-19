@@ -1,0 +1,23 @@
+<div class="p-4 max-w-3xl mx-auto">
+  <h2 class="text-xl mb-4">Create New Post</h2>
+
+  <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+    <div class="mb-4">
+      <label for="title">Title</label>
+      <input pInputText id="title" formControlName="title" class="w-full" />
+      <div *ngIf="postForm.get('title')?.touched && postForm.get('title')?.invalid" class="text-red-600 text-sm mt-1">
+        *Title is required.
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="body">Body</label>
+      <textarea pTextarea rows="8" id="body" formControlName="body" class="w-full"></textarea>
+      <div *ngIf="postForm.get('body')?.touched && postForm.get('body')?.invalid" class="text-red-600 text-sm mt-1">
+        *Body is required.
+      </div>
+    </div>
+
+    <button pButton type="submit" label="Submit Post" [disabled]="postForm.invalid"></button>
+  </form>
+</div>
