@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
 import { authGuard } from './app/shared/guards/auth.guard';
-import { HomePage } from './app/pages/home/home.page';
+import { guestGuard } from './app/shared/guards/guest.guard';
 
 export const appRoutes: Routes = [
     {
@@ -18,18 +18,25 @@ export const appRoutes: Routes = [
             },
             {
                 path: 'create',
-                // canActivate: [authGuard],
+                canActivate: [authGuard],
                 loadComponent: () => import('./app/pages/create-post/create-post.page').then(m => m.CreatePostPage),
             },
         ]
     },
     {
         path: 'login',
+        canActivate: [guestGuard],
         loadComponent: () => import('./app/pages/login/login.page').then(m => m.LoginPage),
     },
     {
         path: 'register',
+        canActivate: [guestGuard],
         loadComponent: () => import('./app/pages/register/register.page').then(m => m.RegisterPage),
+    },
+    {
+        path: 'access',
+        canActivate: [guestGuard],
+        loadComponent: () => import('./app/pages/auth/access').then(m => m.Access),
     },
     // {
     //     path: '**',

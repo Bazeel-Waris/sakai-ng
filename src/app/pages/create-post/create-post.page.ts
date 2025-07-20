@@ -5,7 +5,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { PostService } from '../../shared/services/post.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-create-post',
@@ -14,19 +16,24 @@ import { Router } from '@angular/router';
     CommonModule,
     ReactiveFormsModule,
     InputTextModule,
-    TextareaModule, // <-- Use this
-    ButtonModule
+    TextareaModule,
+    ButtonModule,
+    ToastModule,
+    RouterModule
   ],
+  providers: [MessageService],
   templateUrl: './create-post.page.html',
   // styleUrls: ['./create-post.page.scss']
 })
 export class CreatePostPage {
   postForm: FormGroup;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
     private postService: PostService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
@@ -36,16 +43,32 @@ export class CreatePostPage {
 
   onSubmit() {
     if (this.postForm.valid) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const newPost = {
-        ...this.postForm.value,
-        author: user.name,
-        publishedDate: new Date().toISOString().split('T')[0],
+      this.loading = true;
+      const postData = {
+        title: this.postForm.value.title,
+        body: this.postForm.value.body
       };
-      this.postService.createPost(newPost).subscribe({
-        next: () => this.router.navigate(['/']),
-        error: err => console.error('Error creating post', err)
+
+      this.postService.createPost(postData).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Post created successfully!'
+          });
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.error?.message || 'Failed to create post. Please try again.'
+          });
+          this.loading = false;
+        }
       });
+    } else {
+      this.postForm.markAllAsTouched();
     }
   }
 }

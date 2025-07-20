@@ -1,6 +1,8 @@
 <div class="home-container">
-
-  <h1 class="home-title">Latest Blog Posts</h1>
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="home-title">Latest Blog Posts</h1>
+    <button *ngIf="isAuthenticated()" pButton type="button" icon="pi pi-plus" label="Add New Post" class="bg-blue-600 text-white hover:bg-blue-700 transition rounded-md px-4 py-2 font-semibold shadow" routerLink="/create">Add New Post</button>
+  </div>
   <!-- Add this above your grid in home.page.html -->
   <div class="featured-banner">
     <strong>🔥 Featured:</strong> <span>Check out our latest deep dive on Angular Signals!</span>
@@ -9,15 +11,34 @@
     Welcome to our blog! Here you'll find the latest articles on Angular, web development, and more.
     Dive into our posts to stay updated with the latest trends and insights.</p>
   <div class="ag-grid-card">
-    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; min-height: 400px;" 
+    <ag-grid-angular class="ag-theme-alpine" style="width: 100%;" 
       [rowData]="rowData"
       [columnDefs]="columnDefs"
-      [pagination]="true" 
-      [paginationPageSize]="5"
-      [paginationPageSizeSelector]="[5, 20, 50, 100]" 
       [domLayout]="'autoHeight'" 
       [theme]="'legacy'"
+      [pagination]="false" 
       (rowClicked)="onRowClicked($event)">
     </ag-grid-angular>
-  </div>
+    <div class="flex items-center justify-center mt-4 space-x-4 text-sm font-medium">
+      <button 
+        (click)="previousPage()" 
+        [disabled]="currentPage === 1"
+        class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+        <i class="pi pi-angle-left mr-1"></i> Previous
+      </button>
+    
+      <span class="text-gray-700">
+        Page <span class="font-semibold text-blue-600">{{ currentPage }}</span> of 
+        <span class="font-semibold text-blue-600">{{ totalPages }}</span>
+      </span>
+    
+      <button 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages"
+        class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+        Next <i class="pi pi-angle-right ml-1"></i>
+      </button>
+    </div>
+    
+  </div>  
 </div>

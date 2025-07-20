@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AgGridModule } from 'ag-grid-angular';
 import { Router, RouterModule } from '@angular/router';
 import { _FilterCoreModule, _SharedMenuModule, _SortModule, ClientSideRowModelModule, CustomFilterModule, DateFilterModule, ModuleRegistry, NumberFilterModule, PaginationModule, TextFilterModule, ValidationModule, type ColDef } from 'ag-grid-community';
+import { PostService } from '../../shared/services/post.service';
+import { Post } from '../../shared/models/post.model';
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -25,20 +27,34 @@ ModuleRegistry.registerModules([
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss']
 })
-export class HomePage {
+export class HomePage implements OnInit {
 
   columnDefs: ColDef[] = [
     { headerName: 'Title', field: 'title', sortable: true, filter: true, flex: 1 },
     {
       headerName: 'Excerpt',
-      field: 'excerpt',
+      field: 'body',
       sortable: true,
       filter: true,
       flex: 2,
-      valueGetter: params => params.data.excerpt?.length > 200 ? params.data.excerpt.slice(0, 200) + '...' : params.data.excerpt
+      valueGetter: params => params.data.body?.length > 200 ? params.data.body.slice(0, 200) + '...' : params.data.body
     },
-    { headerName: 'Author', field: 'author', sortable: true, filter: true, flex: 1 },
-    { headerName: 'Published Date', field: 'publishedDate', sortable: true, filter: true, flex: 1 },
+    { 
+      headerName: 'Author', 
+      field: 'User.name', 
+      sortable: true, 
+      filter: true, 
+      flex: 1,
+      valueGetter: params => params.data.User?.name || 'Unknown'
+    },
+    { 
+      headerName: 'Published Date', 
+      field: 'createdAt', 
+      sortable: true, 
+      filter: true, 
+      flex: 1,
+      valueGetter: params => new Date(params.data.createdAt).toLocaleDateString()
+    },
     {
       headerName: 'Action',
       cellRenderer: (params: any) => `<a class="read-more-btn" href="/post/${params.data.id}">Read More</a>`,
@@ -48,57 +64,56 @@ export class HomePage {
     }
   ];
 
-  rowData = [
-    {
-      id: 1,
-      title: 'Understanding Angular Signals',
-      excerpt: 'Angular 17 introduced a new reactive primitive called signals...',
-      author: 'Bazeel Bin Waris',
-      publishedDate: '2025-07-10'
-    },
-    {
-      id: 2,
-      title: 'NestJS Authentication with JWT',
-      excerpt: 'Secure your APIs using Passport.js and JSON Web Tokens...',
-      author: 'Ali Khan',
-      publishedDate: '2025-07-08'
-    },
-    {
-      id: 3,
-      title: 'Getting Started with PrimeNG',
-      excerpt: 'PrimeNG provides a wide range of UI components ready for enterprise applications...',
-      author: 'Fatima Noor',
-      publishedDate: '2025-07-07'
-    },
-    {
-      id: 4,
-      title: 'Building with AG Grid in Angular',
-      excerpt: 'AG Grid is the gold standard for data grids. Let’s explore integration with Angular...',
-      author: 'Ahmed Raza',
-      publishedDate: '2025-07-06'
-    },
-    {
-      id: 5,
-      title: 'Express vs NestJS: A Developer’s Guide',
-      excerpt: 'While both are great Node.js frameworks, they serve different needs...',
-      author: 'Zara Sheikh',
-      publishedDate: '2025-07-05'
-    },
-    {
-      id: 6,
-      title: 'Why PostgreSQL is Better than MySQL',
-      excerpt: 'PostgreSQL offers powerful features, ACID compliance, and extensibility...',
-      author: 'John Doe',
-      publishedDate: '2025-07-04'
-    }
-  ];
+  rowData: Post[] = [];
+  currentPage = 1;
+  totalPages = 0;
+  loading = false;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private postService: PostService
+  ) { }
+
+  ngOnInit() {
+    this.loadPosts();
+  }
+
+  loadPosts(page: number = 1) {
+    this.loading = true;
+    this.postService.getPosts(page).subscribe({
+      next: (response) => {
+        this.rowData = response.posts;
+        this.currentPage = response.currentPage;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading posts:', error);
+        this.loading = false;
+      }
+    });
+  }
 
   onRowClicked(event: any) {
     const postId = event.data.id;
     if (postId) {
       this.router.navigate(['/post', postId]);
     }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.loadPosts(this.currentPage + 1);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.loadPosts(this.currentPage - 1);
+    }
+  }
+
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
   }
 }

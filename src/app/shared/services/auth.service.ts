@@ -1,7 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
 
 @Injectable({
   providedIn: 'root',
@@ -9,70 +18,51 @@ import { BehaviorSubject, Observable, of, tap, throwError } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private apiUrl = 'http://localhost:3000/auth';
+  private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
+  isLoggedIn$ = this.loggedIn.asObservable();
 
-  login(email: string, password: string): Observable<any> {
-    if (email === 'test@example.com' && password === 'password') {
-      const mockUser = { id: 1, name: 'Test User', email };
-      const mockToken = 'mock-jwt-token';
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return of({ user: mockUser, token: mockToken });
-    } else {
-      return throwError(() => new Error('Invalid credentials'));
-    }
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
+      tap(response => {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        this.loggedIn.next(true);
+      })
+    );
   }
 
-  register(name: string, email: string, password: string): Observable<any> {
-    const mockUser = { id: 2, name, email };
-    const mockToken = 'mock-jwt-token';
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    return of({ user: mockUser, token: mockToken });
+  register(name: string, email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, { name, email, password }).pipe(
+      tap(response => {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        this.loggedIn.next(true);
+      })
+    );
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    this.loggedIn.next(false);
+    this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
   }
-  // private apiUrl = 'http://localhost:3000/auth'; // Adjust this based on your backend URL
-  // private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
 
-  // isLoggedIn$ = this.loggedIn.asObservable();
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 
-  // login(credentials: { email: string; password: string }): Observable<any> {
-  //   return this.http.post<{ token: string; name: string }>(`${this.apiUrl}/login`, credentials).pipe(
-  //     tap(res => {
-  //       localStorage.setItem('token', res.token);
-  //       localStorage.setItem('user', res.name);
-  //       this.loggedIn.next(true);
-  //     })
-  //   );
-  // }
+  getUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
 
-  // register(data: { name: string; email: string; password: string }): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/register`, data);
-  // }
-
-  // logout(): void {
-  //   localStorage.removeItem('token');
-  //   localStorage.removeItem('user');
-  //   this.loggedIn.next(false);
-  //   this.router.navigate(['/login']);
-  // }
-
-  // getToken(): string | null {
-  //   return localStorage.getItem('token');
-  // }
-
-  // getUserName(): string | null {
-  //   return localStorage.getItem('user');
-  // }
-
-  // private hasToken(): boolean {
-  //   return !!localStorage.getItem('token');
-  // }
+  private hasToken(): boolean {
+    return !!localStorage.getItem('token');
+  }
 }
